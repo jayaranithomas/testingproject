@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
 using MarsAdvancedTaskPart1NUnitAutomation.Steps;
+using MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsShareSkillComponent;
 
 namespace MarsAdvancedTaskPart1NUnitAutomation.Test
 {
@@ -19,11 +20,12 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Test
     {
         List<ShareSkillsDM> shareSkillList;
         ShareSkillSteps? shareSkillStepsObj;
-
+        ShareSkillRenderingComponent shareSkillRenderingComponent;
         public ShareSkillsTest()
         {
             shareSkillList = new List<ShareSkillsDM>();
             shareSkillStepsObj = new ShareSkillSteps();
+            shareSkillRenderingComponent = new ShareSkillRenderingComponent();
             ReadJSON();
 
         }
@@ -35,14 +37,13 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Test
         [SetUp]
         public void SetUp() 
         {
-            shareSkillStepsObj?.SelectShareSkill();
+            shareSkillRenderingComponent?.SelectShareSkill();
 
         }
 
         [Test, Order(1), Description("This test adds a Share skill Listing")]
         public void TestAddShareSkillListing()
         {
-            //ReadJSON();
             shareSkillStepsObj?.AddNewShareSkill(shareSkillList[0]);
 
         }

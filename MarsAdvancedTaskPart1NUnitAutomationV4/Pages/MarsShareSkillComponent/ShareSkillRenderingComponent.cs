@@ -31,8 +31,30 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsShareSkillComponent
         IWebElement? worksamples;
         IWebElement? activeT;
         IWebElement? activeF;
+        IWebElement? shareSkillButton;
         IWebElement? saveButton;
         IWebElement? cancelButton;
+        IWebElement? messageBox;
+        IWebElement? errorMessage;
+        string actualMessage = string.Empty;
+        string errorMessageString = string.Empty;
+        int tagCount;
+
+        //To navigate to ServiceListing Page
+        public void SelectShareSkill()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//a[@href='/Home/ServiceListing']", 3);
+                shareSkillButton = driver.FindElement(By.XPath("//a[@href='/Home/ServiceListing']"));
+                shareSkillButton.Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
 
         public void RenderShareSkillComponents()
         {
@@ -197,110 +219,87 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsShareSkillComponent
 
             return cancelButton!;
         }
-
-       /* public string GetTitle()
+        public string CapturePopupMessage()
         {
-            return titleText;
+
+            Thread.Sleep(1000);
+            try
+            {
+                messageBox = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            if (messageBox != null)
+            {
+                actualMessage = messageBox.Text;
+                Console.WriteLine(actualMessage);
+            }
+
+            return actualMessage;
         }
-        public string GetDescription()
+        public string CaptureErrorMessage()
         {
-            return descriptionText;
+            Thread.Sleep(1000);
+            try
+            {
+                errorMessage = driver.FindElement(By.XPath("//div[@class='ui basic red prompt label transition visible']"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            if (errorMessage != null)
+            {
+                errorMessageString = errorMessage.Text;
+                Console.WriteLine(errorMessageString);
+            }
+
+            return errorMessageString;
+
         }
-        public void SetCancelFlag(int flag)
+        public string CaptureSubcategoryErrorMessage()
         {
-            this.cancelFlag = flag;
+            Thread.Sleep(1000);
+            try
+            {
+                errorMessage = driver.FindElement(By.XPath("//div[@class='ui red basic label']"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            if (errorMessage != null)
+            {
+                errorMessageString = errorMessage.Text;
+                Console.WriteLine(errorMessageString);
+            }
+
+            return errorMessageString;
+
+        }
+        public int GetTagCount()
+        {
+            Thread.Sleep(1000);
+            try
+            {
+                tagCount = driver.FindElements(By.XPath("//span[@class='ReactTags__tag']")).Count;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            return tagCount;
+        }
+        public string GetCurrentUrl()
+        {
+            Wait.WaitToBeVisible("XPath", "//h2[contains(text(),'Manage Listings')]", 10);
+            string currentUrl = driver.Url;
+            return currentUrl;
         }
 
-
-        public void AddShareSkills(ShareSkillsDM shareSkillsDM)
-        {
-            RenderShareSkillComponents();
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.title))
-                title?.SendKeys(shareSkillsDM.title);
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.description))
-                description?.SendKeys(shareSkillsDM.description);
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.category))
-            {
-                category?.SendKeys(shareSkillsDM.category);
-                RenderSubcategoryComponent();
-                if (!string.IsNullOrEmpty(shareSkillsDM.subcategory))
-                    subcategory?.SendKeys(shareSkillsDM.subcategory);
-            }
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.tag))
-            {
-                tagList?[0].SendKeys(shareSkillsDM.tag);
-                tagList?[0].SendKeys(Keys.Enter);
-            }
-
-            if (shareSkillsDM.servicetype.Equals("1"))
-            {
-                servicetype1?.Click();
-            }
-            else if (shareSkillsDM.servicetype.Equals("0"))
-            {
-                servicetype0?.Click();
-            }
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.locationtype))
-            {
-                locationtype?.SendKeys(shareSkillsDM.locationtype);
-                locationtype?.Click();
-            }
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.startdate))
-            {
-                startdate?.SendKeys(shareSkillsDM.startdate);
-            }
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.enddate))
-                enddate?.SendKeys(shareSkillsDM.enddate);
-
-            if (shareSkillsDM.skilltrade.Equals("true"))
-            {
-                skilltradeT?.Click();
-                tagList?[1].SendKeys(shareSkillsDM.skillexchange);
-                tagList?[1].SendKeys(Keys.Enter);
-            }
-            else
-            {
-                skilltradeF?.Click();
-                RenderCreditComponent();
-                credit?.SendKeys(shareSkillsDM.credit);
-            }
-
-            if (!string.IsNullOrEmpty(shareSkillsDM.worksamples))
-            {
-                string filePath = @"F:\sample1.txt";
-                worksamples?.Click();
-                worksamples?.SendKeys(filePath);
-            }
-
-            if (shareSkillsDM.active.Equals("true"))
-            {
-                activeT?.Click();
-            }
-            else if (shareSkillsDM.active.Equals("false"))
-            {
-                activeF?.Click();
-            }
-
-            if (!string.IsNullOrEmpty(title?.GetAttribute("value")))
-                titleText = title.GetAttribute("value");
-
-            if (!string.IsNullOrEmpty(description?.Text))
-                descriptionText = description.Text;
-
-            if (cancelFlag == 0)
-                saveButton?.Click();
-            else
-            {
-                cancelFlag = 0;
-                cancelButton?.Click();
-            }
-        }*/
     }
 }

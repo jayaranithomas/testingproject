@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using MarsAdvancedTaskPart1NUnitAutomation.AssertHelpers;
+using Microsoft.CodeAnalysis;
 
 namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavigationMenuComponents
 {
@@ -89,8 +91,6 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
                     languageRenderingComponent.LanguageLevelLocator()?.SendKeys("Language Level");
                 languageRenderingComponent.LanguageLevelLocator()?.Click();
             }
-
-
             Thread.Sleep(2000);
 
             if (cancelFlag != 1)
@@ -102,21 +102,28 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
             { cancelFlag = 0; languageRenderingComponent.CancelButtonLocator()?.Click(); }
 
         }
-       
-        public int GetLanguageRecordsCount()
+        public void DeleteAllLanguageRecords()
         {
-            try
+            
+            int rowCount = languageRenderingComponent.GetLanguageRecordsCount();
+            for (int i = 1; i <= rowCount;)
             {
-                Wait.WaitToBeVisible("XPath", "//div[@data-tab='first']//tbody[last()]", 8);
+                languageRenderingComponent.RenderDeleteComponents();
+                rowCount--;
+               Thread.Sleep(2000);
             }
-            catch (Exception ex)
+        }
+        public void CheckAndMakeSpaceAvailablity()
+        {
+
+            int rowcount = languageRenderingComponent.GetLanguageRecordsCount();
+
+            if (rowcount == 4)
             {
-                Console.WriteLine(ex);
+                languageRenderingComponent.RenderDeleteComponents();
             }
-            int rowcount = driver.FindElements(By.XPath("//div[@data-tab='first']//tbody")).Count;
-            return rowcount;
-        }     
-    
-        
+        }
+
+
     }
 }

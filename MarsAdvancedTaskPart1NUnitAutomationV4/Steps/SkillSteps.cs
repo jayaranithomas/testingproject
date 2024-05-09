@@ -23,6 +23,8 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
         string skillName;
         int cancelFlag;
         SkillsAddAndUpdateComponent skillsAddAndUpdateComponent;
+        SkillsRenderingComponent skillsRenderingComponent;
+        SkillsAssertHelper skillsAssertHelper;
 
         public SkillSteps()
         {
@@ -31,191 +33,147 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             skillName = string.Empty;
             cancelFlag = 0;
             skillsAddAndUpdateComponent = new SkillsAddAndUpdateComponent();
+            skillsRenderingComponent = new SkillsRenderingComponent();
+            skillsAssertHelper = new SkillsAssertHelper();
         }
 
-        //To capture the pop up message
-        public void CapturePopupMessage()
+        public void DeleteSkillRecords()
         {
-
-            Thread.Sleep(1000);
-
-            IWebElement messageBox = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
-            actualMessage = messageBox.Text;
-
-            IWebElement closeMessageIcon = driver.FindElement(By.XPath("//*[@class='ns-close']"));
-            closeMessageIcon.Click();
-
-            Console.WriteLine(actualMessage);
-
-        }
-        //To get the last entered Language
-        public void GetLastSkillName()
-        {
-            IWebElement skillNameTextBox = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[last()]//td[1]"));
-            skillName = skillNameTextBox.Text;
-        }
-        //To get the first entered Language
-        public void GetFirstSkillName()
-        {
-            IWebElement skillNameTextBox = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[1]//td[1]"));
-            skillName = skillNameTextBox.Text;
-        }
-
-        public void DeleteAllSkillRecords()
-        {
-            int rowcount = driver.FindElements(By.XPath("//div[@data-tab='second']//tbody")).Count;
-
-            for (int i = 1; i <= rowcount;)
-            {
-                GetLastSkillName();
-
-                IWebElement deleteButton = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[last()]//i[@class='remove icon']"));
-                deleteButton.Click();
-
-                rowcount--;
-
-                CapturePopupMessage();
-
-                if (!string.IsNullOrEmpty(skillName))
-                    expectedMessage = skillName + " has been deleted";
-                else
-                    expectedMessage = "has been deleted";
-
-                Assert.That(actualMessage.Equals(expectedMessage), "The skill record has not been deleted successfully");
-
-                Thread.Sleep(2000);
-
-            }
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            int rowCount = skillsRenderingComponent.GetSkillRecordsCount();
+            skillsAssertHelper.AssertDeleteAllSkillRecords(rowCount);
 
         }
         public void AddNewSkill(SkillsDM skillsDM)
         {
-
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
             skillsAddAndUpdateComponent.AddSkill(skillsDM);
 
-            CapturePopupMessage();
-            GetLastSkillName();
+            actualMessage = skillsRenderingComponent.CapturePopupMessage();
+            skillName = skillsRenderingComponent.GetLastSkillName();
 
             if (!string.IsNullOrEmpty(skillName))
                 expectedMessage = skillName + " has been added to your skills";
             else
                 expectedMessage = "has been added to your skills";
-
-            Assert.That(actualMessage.Equals(expectedMessage), "The skill record has not been added successfully");
+            skillsAssertHelper.AssertAddNewSkill(expectedMessage, actualMessage);
 
         }
         public void AddNewSkillRecordWithInsufficientData(SkillsDM skillsDM)
         {
             skillsAddAndUpdateComponent.AddSkill(skillsDM);
 
-            CapturePopupMessage();
+            actualMessage = skillsRenderingComponent.CapturePopupMessage();
             expectedMessage = "Please enter skill and experience level";
 
-            Assert.That(actualMessage.Equals(expectedMessage), "The skill record has been added successfully");
+            skillsAssertHelper.AssertNewSkillNotAddedSuccessfully(expectedMessage, actualMessage);
         }
         public void AddAlreadyExistingSkillRecord(SkillsDM skillsDM)
         {
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            skillsAddAndUpdateComponent.AddSkill(skillsDM);
             skillsAddAndUpdateComponent.AddSkill(skillsDM);
 
-            CapturePopupMessage();
+            actualMessage = skillsRenderingComponent.CapturePopupMessage();
             expectedMessage = "This skill is already exist in your skill list.";
 
-            Assert.That(actualMessage.Equals(expectedMessage), "The skill record has been added successfully");
+            skillsAssertHelper.AssertNewSkillNotAddedSuccessfully(expectedMessage, actualMessage);
 
         }
-        public void AddDuplicateSkillWithDifferentLevel(SkillsDM skillsDM)
+        public void AddDuplicateSkillWithDifferentLevel(SkillsDM skillsDM1, SkillsDM skillsDM2)
         {
-            skillsAddAndUpdateComponent.AddSkill(skillsDM);
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            skillsAddAndUpdateComponent.AddSkill(skillsDM1);
+            skillsAddAndUpdateComponent.AddSkill(skillsDM2);
 
-            CapturePopupMessage();
+            actualMessage = skillsRenderingComponent.CapturePopupMessage();
             expectedMessage = "Duplicated data";
 
-            Assert.That(actualMessage.Equals(expectedMessage), "The duplicate skill record has been added successfully");
+            skillsAssertHelper.AssertNewSkillNotAddedSuccessfully(expectedMessage, actualMessage);
 
         }
-        public void CancelAddSkillRecord(SkillsDM skillsDM)
+        public void CancelAddSkillRecord(SkillsDM skillsDM1, SkillsDM skillsDM2)
         {
             cancelFlag = 1;
-
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            skillsAddAndUpdateComponent.AddSkill(skillsDM1);
             skillsAddAndUpdateComponent.SetCancelFlag(cancelFlag);
             Thread.Sleep(2000);
-
-            skillsAddAndUpdateComponent.AddSkill(skillsDM);
+            skillsAddAndUpdateComponent.AddSkill(skillsDM2);
             cancelFlag = 0;
 
-
-            GetLastSkillName();
+            skillName = skillsRenderingComponent.GetLastSkillName();
 
             if (!skillName.Equals("Testing"))
             {
                 Console.WriteLine("Skill record cancelled before adding");
-                Assert.That(!skillName.Equals("Testing"), "Skill record not cancelled successfully");
+                skillsAssertHelper.AssertCancelSkill(skillName, "Testing");
 
             }
         }
-        public void UpdateExistingSkillRecordWithFieldsEdited(SkillsDM skillsDM)
+        public void UpdateExistingSkillRecordWithFieldsEdited(SkillsDM skillsDM1, SkillsDM skillsDM2)
         {
-            skillsAddAndUpdateComponent.EditSkillRecord(skillsDM);
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            skillsAddAndUpdateComponent.AddSkill(skillsDM1);
 
-            CapturePopupMessage();
-            GetFirstSkillName();
+            skillsAddAndUpdateComponent.EditSkillRecord(skillsDM2);
+
+            actualMessage = skillsRenderingComponent.CapturePopupMessage();
+            skillName = skillsRenderingComponent.GetFirstSkillName();
             if (!string.IsNullOrEmpty(skillName))
                 expectedMessage = skillName + " has been updated to your skills";
             else
                 expectedMessage = "has been updated to your skills";
 
-            Assert.That(actualMessage.Equals(expectedMessage), "The skill record has not been updated successfully");
-
+            skillsAssertHelper.AssertUpdateSkill(expectedMessage, actualMessage);
         }
-        public void UpdateExistingSkillRecordWithNoFieldsEdited()
+        public void UpdateExistingSkillRecordWithNoFieldsEdited(SkillsDM skillsDM)
         {
-            IWebElement editButton = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[1]//i[@class='outline write icon']"));
-            editButton.Click();
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            skillsAddAndUpdateComponent.AddSkill(skillsDM);
 
-            IWebElement updateButton = driver.FindElement(By.XPath("//div[@data-tab='second']//input[@value='Update']"));
-            updateButton.Click();
+            skillsRenderingComponent.RenderEditComponent();
 
-            CapturePopupMessage();
+            skillsRenderingComponent.RenderUpdateComponents();
+            skillsRenderingComponent.UpdateButtonLocator()?.Click();
+
+            actualMessage = skillsRenderingComponent.CapturePopupMessage();
 
             expectedMessage = "This skill is already added to your skill list.";
 
-            Assert.That(actualMessage.Equals(expectedMessage), "The skill record has been updated successfully");
-
+            skillsAssertHelper.AssertExistingSkillNotUpdatedSuccessfully(expectedMessage, actualMessage);
         }
-        public void UpdateSkillRecordWithInsufficientData(SkillsDM skillsDM)
+        public void UpdateSkillRecordWithInsufficientData(SkillsDM skillsDM1, SkillsDM skillsDM2)
         {
-            skillsAddAndUpdateComponent.EditSkillRecord(skillsDM);
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            skillsAddAndUpdateComponent.AddSkill(skillsDM1);
 
-            CapturePopupMessage();
+            skillsAddAndUpdateComponent.EditSkillRecord(skillsDM2);
+
+            actualMessage = skillsRenderingComponent.CapturePopupMessage();
             expectedMessage = "Please enter skill and experience level";
 
-            Assert.That(actualMessage.Equals(expectedMessage), "The skill record has been updated successfully");
+            skillsAssertHelper.AssertExistingSkillNotUpdatedSuccessfully(expectedMessage, actualMessage);
         }
-        public void UpdateExistingSkillRecordWithExistingSkillName(SkillsDM skillsDM1, SkillsDM skillsDM2)
-        {
-
-            skillsAddAndUpdateComponent.AddSkill(skillsDM1);
-            Thread.Sleep(3000);
-            UpdateExistingSkillRecordWithFieldsEdited(skillsDM2);
-
-        }
-        public void CancelUpdateSkillRecord(SkillsDM skillsDM)
+        public void CancelUpdateSkillRecord(SkillsDM skillsDM1, SkillsDM skillsDM2)
         {
             cancelFlag = 1;
+            skillsAddAndUpdateComponent.DeleteAllSkillRecords();
+            skillsAddAndUpdateComponent.AddSkill(skillsDM1);
 
             skillsAddAndUpdateComponent.SetCancelFlag(cancelFlag);
             Thread.Sleep(2000);
 
-            skillsAddAndUpdateComponent.EditSkillRecord(skillsDM);
+            skillsAddAndUpdateComponent.EditSkillRecord(skillsDM2);
             cancelFlag = 0;
 
 
-            GetLastSkillName();
+            skillName = skillsRenderingComponent.GetLastSkillName();
 
             if (!skillName.Equals("Painting"))
             {
                 Console.WriteLine("Skill record cancelled before Updating");
-                Assert.That(!skillName.Equals("Painting"), "Skill record not cancelled successfully");
+                skillsAssertHelper.AssertCancelSkill(skillName, "Painting");
 
             }
         }

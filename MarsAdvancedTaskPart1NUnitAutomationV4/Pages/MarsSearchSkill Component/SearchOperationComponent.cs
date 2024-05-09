@@ -29,7 +29,6 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsSearchSkill_Component
                     searchSkillsRenderingComponent.SubcategoryRenderingComponent(searchSkillsDM.subcategory);
                     searchSkillsRenderingComponent.SubCategoryLocator()?.Click();
                 }
-
             }
             if (!string.IsNullOrEmpty(searchSkillsDM.searchskills))
             {
@@ -56,6 +55,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsSearchSkill_Component
                 searchSkillsRenderingComponent.FilterLocator()?.Click();
                 Thread.Sleep(2000);
             }
+            Thread.Sleep(2000);
             searchSkillsRenderingComponent.GetSearchResult();
         }
     }

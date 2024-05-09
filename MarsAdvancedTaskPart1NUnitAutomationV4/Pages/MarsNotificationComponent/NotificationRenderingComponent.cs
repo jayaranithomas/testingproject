@@ -17,6 +17,24 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsNotificationComponent
         IWebElement? markAsReadButton;
         IWebElement? firstNotificationCheckBox;
         IWebElement? deleteButton;
+        IWebElement? dashboardTab;
+        IWebElement? messageBox;
+        string actualMessage = string.Empty;
+        int notificationCount;
+        public void SelectDashboard()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//a[contains(text(),'Dashboard')]", 10);
+                dashboardTab = driver.FindElement(By.XPath("//a[contains(text(),'Dashboard')]"));
+                dashboardTab.Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         public void RenderLoadMoreButton()
         {
             try
@@ -119,5 +137,42 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsNotificationComponent
                 Console.WriteLine(ex.Message);
             }
         }
+        public int NotificationCount()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//div[@class='ui items segment']//div[@class='content']/a/div[@class='content']", 20);
+                notificationCount = driver.FindElements(By.XPath(" //input[@type='checkbox']")).Count;
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return notificationCount;
+        }
+        public string CapturePopupMessage()
+        {
+
+            Thread.Sleep(1000);
+            try
+            {
+                messageBox = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            if (messageBox != null)
+            {
+                actualMessage = messageBox.Text;
+                Console.WriteLine(actualMessage);
+            }
+
+            return actualMessage;
+        }
+
     }
 }

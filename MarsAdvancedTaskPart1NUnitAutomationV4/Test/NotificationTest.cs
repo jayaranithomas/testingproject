@@ -1,4 +1,5 @@
-﻿using MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileAboutMeComponent;
+﻿using MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsNotificationComponent;
+using MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileAboutMeComponent;
 using MarsAdvancedTaskPart1NUnitAutomation.ReportClass;
 using MarsAdvancedTaskPart1NUnitAutomation.Steps;
 using MarsAdvancedTaskPart1NUnitAutomation.Utilities;
@@ -18,15 +19,16 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Test
 
 
         NotificationSteps? notificationStepsObj;
-
+        NotificationRenderingComponent notificationRenderingComponent;
         public NotificationTest()
         {
             notificationStepsObj = new NotificationSteps();
+            notificationRenderingComponent = new NotificationRenderingComponent();
         }
         [SetUp]
         public void Setup() 
-        { 
-            notificationStepsObj?.SelectDashboard();
+        {
+            notificationRenderingComponent?.SelectDashboard();
         }
 
         [Test, Order(1), Description("This test checks if notifications can be viewed or not")]

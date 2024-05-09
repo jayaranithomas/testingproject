@@ -22,9 +22,9 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
         IWebElement? updateButton;
         IWebElement? cancelButton;
         IWebElement? deleteButton;
-        IWebElement? messageBox;
-        IWebElement? closeMessageIcon;
         IWebElement? languageNameField;
+        IList<IWebElement>? addNewButtonVisible;
+        IWebElement? messageBox;
         string actualMessage = string.Empty;
 
         public void RenderAddComponents()
@@ -76,6 +76,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
         {
             try
             {
+                Wait.WaitToBeVisible("XPath", "//div[@data-tab='first']//div[contains(text(),'Add New')]", 8);
                 addNewButton = driver.FindElement(By.XPath("//div[@data-tab='first']//div[contains(text(),'Add New')]"));
             }
             catch (Exception ex)
@@ -88,6 +89,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
         {
             try
             {
+                Wait.WaitToBeVisible("XPath", "//div[@data-tab='first']//tbody[1]//i[@class='outline write icon']", 8);
                 editButton = driver.FindElement(By.XPath("//div[@data-tab='first']//tbody[1]//i[@class='outline write icon']"));
             }
             catch (Exception ex)
@@ -114,7 +116,6 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
             try
             {
                 messageBox = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
-                closeMessageIcon = driver.FindElement(By.XPath("//*[@class='ns-close']"));
             }
             catch (Exception ex)
             {
@@ -127,7 +128,6 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
                 Console.WriteLine(actualMessage);
             }
 
-            closeMessageIcon?.Click();
             return actualMessage;
         }
 
@@ -158,7 +158,27 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
             string languageName = languageNameField!.Text;
             return languageName;
         }
-       
+        public int GetLanguageRecordsCount()
+        {
+            int rowCount = driver.FindElements(By.XPath("//div[@data-tab='first']//tbody")).Count;
+            
+            return rowCount;
+
+        }
+        public void AddNewButtonVisibility()
+        {
+            try 
+            {
+                addNewButtonVisible = driver.FindElements(By.XPath("//div[@data-tab='first']//div[contains(text(),'Add New')]"));
+            }
+            catch (Exception ex) 
+            { Console.WriteLine(ex); }
+           
+        }
+        public int GetAddNewButtonCount()
+        {
+            return addNewButtonVisible!.Count;
+        }
         public IWebElement LanguageTBLocator()
         {
 

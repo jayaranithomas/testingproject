@@ -1,6 +1,7 @@
 ﻿using MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileAboutMeComponent;
 using MarsAdvancedTaskPart1NUnitAutomation.ReportClass;
 using MarsAdvancedTaskPart1NUnitAutomation.Utilities;
+using MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsSearchSkill_Component;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -18,17 +19,18 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Test
     {
         List<SearchSkillsDM>? searchSkillsList;
         SearchSkillSteps? searchSkillStepsObj;
-
-        public SearchSkill() 
+        SearchSkillsRenderingComponent searchSkillsRenderingComponent;
+        public SearchSkill()
         {
             searchSkillsList = new List<SearchSkillsDM>();
             searchSkillStepsObj = new SearchSkillSteps();
+            searchSkillsRenderingComponent = new SearchSkillsRenderingComponent();
             JSONDataMethod();
         }
         [SetUp]
-        public void Setup() 
+        public void Setup()
         {
-            searchSkillStepsObj?.SelectSearchSkill();
+            searchSkillsRenderingComponent?.SelectSearchSkill();
         }
         public void JSONDataMethod()
         {
@@ -39,7 +41,6 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Test
         [Test, Order(1), Description("This test searches for a specific skill")]
         public void TestSearchSkillWithSkillName()
         {
-            //JSONDataMethod();
             searchSkillStepsObj?.SearchSkillWithSkillName(searchSkillsList![0]);
 
         }

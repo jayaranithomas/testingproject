@@ -1,6 +1,7 @@
 ﻿using MarsAdvancedTaskPart1NUnitAutomation.DataModel;
 using MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavigationMenuComponents.RenderingComponents;
 using MarsAdvancedTaskPart1NUnitAutomation.Utilities;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
     {
         int cancelFlag;
         SkillsRenderingComponent skillsRenderingComponent;
-        public SkillsAddAndUpdateComponent() 
+        public SkillsAddAndUpdateComponent()
         {
             skillsRenderingComponent = new SkillsRenderingComponent();
             cancelFlag = 0;
@@ -27,9 +28,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
 
         public void AddSkill(SkillsDM skillDM)
         {
-            IWebElement addNewButton = driver.FindElement(By.XPath("//div[@data-tab='second']//div[contains(text(),'Add New')]"));
-            addNewButton.Click();
-
+            skillsRenderingComponent.RenderAddNewComponent();
             skillsRenderingComponent.RenderAddComponents();
 
             if (!string.IsNullOrEmpty(skillDM.skill))
@@ -55,11 +54,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
 
         public void EditSkillRecord(SkillsDM skillDM)
         {
-            Wait.WaitToBeClickable("XPath", "//div[@data-tab='second']//tbody[1]//i[@class='outline write icon']", 3);
-
-            IWebElement editButton = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[1]//i[@class='outline write icon']"));
-            editButton.Click();
-
+            skillsRenderingComponent.RenderEditComponent();
             skillsRenderingComponent.RenderUpdateComponents();
 
             if (!skillDM.skill.Equals("No Change"))
@@ -99,6 +94,17 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
             else
             { cancelFlag = 0; skillsRenderingComponent.CancelButtonLocator()?.Click(); }
 
+        }
+        public void DeleteAllSkillRecords()
+        {
+            int rowCount = skillsRenderingComponent.GetSkillRecordsCount();
+
+            for (int i = 1; i <= rowCount;)
+            {
+                skillsRenderingComponent.RenderDeleteComponent();
+                rowCount--;
+                Thread.Sleep(2000);
+            }
         }
     }
 }

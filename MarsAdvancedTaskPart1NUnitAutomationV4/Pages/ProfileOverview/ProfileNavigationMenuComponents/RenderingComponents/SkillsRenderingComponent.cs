@@ -18,6 +18,14 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
         IWebElement? addButton;
         IWebElement? updateButton;
         IWebElement? cancelButton;
+        IWebElement? deleteButton;
+        IWebElement? addNewButton;
+        IWebElement? editButton;
+        IWebElement? skillNameTextBox;
+        IWebElement? messageBox;
+        string actualMessage = string.Empty;
+        string skillName = string.Empty;
+
         public void RenderAddComponents()
         {
             try
@@ -51,6 +59,49 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
             }
 
         }
+        public void RenderAddNewComponent()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//div[@data-tab='second']//div[contains(text(),'Add New')]", 8);
+                addNewButton = driver.FindElement(By.XPath("//div[@data-tab='second']//div[contains(text(),'Add New')]"));
+                addNewButton?.Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+        }
+        public void RenderEditComponent()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//div[@data-tab='second']//tbody[1]//i[@class='outline write icon']", 8);
+                editButton = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[1]//i[@class='outline write icon']"));
+                editButton?.Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+        }
+
+        public void RenderDeleteComponent()
+        {
+            try
+            {
+                deleteButton = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[last()]//i[@class='remove icon']"));
+                deleteButton.Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+        }
+
         public IWebElement SkillsTBLocator()
         {
 
@@ -76,85 +127,68 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavi
 
             return updateButton!;
         }
-        /*public void SetCancelFlag(int flag)
+        public string CapturePopupMessage()
         {
-            cancelFlag = flag;
+
+            Thread.Sleep(1000);
+            try
+            {
+                messageBox = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            if (messageBox != null)
+            {
+                actualMessage = messageBox.Text;
+                Console.WriteLine(actualMessage);
+            }
+
+            return actualMessage;
+        }
+        //To get the last entered Language
+        public string GetLastSkillName()
+        {
+            try
+            {
+                skillNameTextBox = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[last()]//td[1]"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            if (skillNameTextBox != null)
+                skillName = skillNameTextBox.Text;
+
+            return skillName;
+        }
+        //To get the first entered Language
+        public string GetFirstSkillName()
+        {
+
+            try
+            {
+                skillNameTextBox = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[1]//td[1]"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            if (skillNameTextBox != null)
+                skillName = skillNameTextBox.Text;
+
+            return skillName;
+        }
+        public int GetSkillRecordsCount()
+        {
+            int rowCount = driver.FindElements(By.XPath("//div[@data-tab='second']//tbody")).Count;
+
+            return rowCount;
+
         }
 
 
-        public void AddSkill(SkillsDM skillDM)
-        {
-            IWebElement addNewButton = driver.FindElement(By.XPath("//div[@data-tab='second']//div[contains(text(),'Add New')]"));
-            addNewButton.Click();
-
-            RenderAddComponents();
-
-            if (!string.IsNullOrEmpty(skillDM.skill))
-            {
-                skillTextBox?.Click();
-                skillTextBox?.SendKeys(skillDM.skill);
-            }
-            if (!string.IsNullOrEmpty(skillDM.level))
-            {
-                chooseLevelDD?.Click();
-                chooseLevelDD?.SendKeys(skillDM.level);
-            }
-
-            Thread.Sleep(2000);
-
-            if (cancelFlag != 1)
-            {
-                addButton?.Click();
-            }
-            else
-            { cancelFlag = 0; cancelButton?.Click(); }
-        }
-
-        public void EditSkillRecord(SkillsDM skillDM)
-        {
-            Wait.WaitToBeClickable("XPath", "//div[@data-tab='second']//tbody[1]//i[@class='outline write icon']", 3);
-
-            IWebElement editButton = driver.FindElement(By.XPath("//div[@data-tab='second']//tbody[1]//i[@class='outline write icon']"));
-            editButton.Click();
-
-            RenderUpdateComponents();
-            if (!skillDM.skill.Equals("No Change"))
-            {
-                if (string.IsNullOrEmpty(skillDM.skill))
-                {
-                    var actions = new OpenQA.Selenium.Interactions.Actions(driver);
-                    actions.Click(skillTextBox);
-                    actions.KeyDown(Keys.Control).SendKeys("a").KeyUp(Keys.Control).SendKeys(Keys.Delete);
-                    actions.Perform();
-                }
-                else
-                {
-                    skillTextBox?.Clear();
-                    skillTextBox?.SendKeys(skillDM.skill);
-                }
-            }
-            if (!skillDM.level.Equals("No Change"))
-            {
-                chooseLevelDD?.Click();
-                if (!string.IsNullOrEmpty(skillDM.level))
-                    chooseLevelDD?.SendKeys(skillDM.level);
-
-                else
-                    chooseLevelDD?.SendKeys("Skill Level");
-                chooseLevelDD?.Click();
-            }
-
-
-            Thread.Sleep(2000);
-
-            if (cancelFlag != 1)
-            {
-
-                updateButton?.Click();
-            }
-            else
-            { cancelFlag = 0; cancelButton?.Click(); }
-
-        }*/
     }
 }

@@ -5,6 +5,8 @@ using MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavigati
 using MarsAdvancedTaskPart1NUnitAutomation.Utilities;
 using NUnit.Framework;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +16,7 @@ using System.Threading.Tasks;
 namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
 {
 
-    public class LanguageSteps : CommonDriver
+    public class LanguageSteps
     {
         string actualMessage;
         string expectedMessage;
@@ -35,29 +37,15 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             languageRenderingComponent = new LanguageRenderingComponent();
 
         }
-        public void DeleteAllLanguageRecords()
+        public void DeleteLanguageRecords()
         {
-            int rowCount = languageAddAndUpdateComponent.GetLanguageRecordsCount();
-            for (int i = 1; i <= rowCount;)
-            {
-                languageName = languageRenderingComponent.GetLastLanguageName();
-                languageRenderingComponent.RenderDeleteComponents();
-                rowCount--;
-
-                actualMessage = languageRenderingComponent.CapturePopupMessage();
-
-                if (!string.IsNullOrEmpty(languageName))
-                    expectedMessage = languageName + " has been deleted from your languages";
-                else
-                    expectedMessage = "has been deleted from your languages";
-
-                languageAssertHelper.AssertDeleteAllLanguageRecords(expectedMessage, actualMessage);
-                Thread.Sleep(2000);
-
-            }
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            int rowCount = languageRenderingComponent.GetLanguageRecordsCount();
+            languageAssertHelper.AssertDeleteAllLanguageRecords(rowCount);
         }
         public void AddNewLanguage(LanguageDM languageDM)
         {
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
             languageAddAndUpdateComponent.AddLanguage(languageDM);
             actualMessage = languageRenderingComponent.CapturePopupMessage();
             languageName = languageRenderingComponent.GetLastLanguageName();
@@ -68,10 +56,11 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
                 expectedMessage = "has been added to your languages";
             languageAssertHelper.AssertAddNewLanguage(expectedMessage, actualMessage);
 
-        }       
+        }
 
         public void AddNewLanguageRecordWithInsufficientData(LanguageDM languageDM)
         {
+            languageAddAndUpdateComponent.CheckAndMakeSpaceAvailablity();
             languageAddAndUpdateComponent.AddLanguage(languageDM);
             actualMessage = languageRenderingComponent.CapturePopupMessage();
             expectedMessage = "Please enter language and level";
@@ -80,51 +69,46 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
 
         public void AddAlreadyExistingLanguageRecord(LanguageDM languageDM)
         {
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM);
             languageAddAndUpdateComponent.AddLanguage(languageDM);
             actualMessage = languageRenderingComponent.CapturePopupMessage();
             expectedMessage = "This language is already exist in your language list.";
             languageAssertHelper.AssertNewLanguageNotAddedSuccessfully(expectedMessage, actualMessage);
         }
 
-        public void AddDuplicateLanguageWithDifferentLevel(LanguageDM languageDM)
+        public void AddDuplicateLanguageWithDifferentLevel(LanguageDM languageDM1, LanguageDM languageDM2)
         {
-            languageAddAndUpdateComponent.AddLanguage(languageDM);
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM1);
+            languageAddAndUpdateComponent.AddLanguage(languageDM2);
             actualMessage = languageRenderingComponent.CapturePopupMessage();
             expectedMessage = "Duplicated data";
             languageAssertHelper.AssertNewLanguageNotAddedSuccessfully(expectedMessage, actualMessage);
         }
-        public void AddFifthLanguage()
+        public void AddFifthLanguage(LanguageDM languageDM1, LanguageDM languageDM2, LanguageDM languageDM3, LanguageDM languageDM4)
         {
-            int rowcount = languageAddAndUpdateComponent.GetLanguageRecordsCount();
-
-            if (rowcount == 4)
-            {
-                try
-                {
-                    languageRenderingComponent.RenderAddNewComponent();
-                }
-                catch (Exception ex)
-                {
-                    Assert.Pass(ex.Message);
-                }
-            }
-
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM1);
+            languageAddAndUpdateComponent.AddLanguage(languageDM2);
+            languageAddAndUpdateComponent.AddLanguage(languageDM3);
+            languageAddAndUpdateComponent.AddLanguage(languageDM4);
+            Thread.Sleep(2000);
+            languageRenderingComponent.AddNewButtonVisibility();
+            if (languageRenderingComponent.GetAddNewButtonCount()==0)
+             languageAssertHelper.AssertAddFifthLanguage();
+            
         }
-        public void CancelAddLanguageRecord(LanguageDM languageDM)
+        public void CancelAddLanguageRecord(LanguageDM languageDM1, LanguageDM languageDM2)
         {
             cancelFlag = 1;
-
-            int rowcount = languageAddAndUpdateComponent.GetLanguageRecordsCount();
-
-            if (rowcount == 4)
-            {
-                languageRenderingComponent.RenderDeleteComponents();
-            }
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM1);
 
             languageAddAndUpdateComponent.SetCancelFlag(cancelFlag);
             Thread.Sleep(2000);
 
-            languageAddAndUpdateComponent.AddLanguage(languageDM);
+            languageAddAndUpdateComponent.AddLanguage(languageDM2);
             cancelFlag = 0;
 
             languageName = languageRenderingComponent.GetLastLanguageName();
@@ -132,13 +116,16 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             if (!languageName.Equals("Urdu"))
             {
                 Console.WriteLine("Language record cancelled before adding");
-                languageAssertHelper.AssertCancelLanguage(languageName,"Urdu");
+                languageAssertHelper.AssertCancelLanguage(languageName, "Urdu");
 
             }
         }
-        public void UpdateExistingLanguageRecordWithFieldsEdited(LanguageDM languageDM)
+        public void UpdateExistingLanguageRecordWithFieldsEdited(LanguageDM languageDM1, LanguageDM languageDM2)
         {
-            languageAddAndUpdateComponent.EditLanguageRecord(languageDM);
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM1);
+
+            languageAddAndUpdateComponent.EditLanguageRecord(languageDM2);
 
             actualMessage = languageRenderingComponent.CapturePopupMessage();
             languageName = languageRenderingComponent.GetFirstLanguageName();
@@ -149,8 +136,12 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
                 expectedMessage = "has been updated to your languages";
             languageAssertHelper.AssertUpdateLanguage(expectedMessage, actualMessage);
         }
-        public void UpdateExistingLanguageRecordWithNoFieldsEdited()
+        public void UpdateExistingLanguageRecordWithNoFieldsEdited(LanguageDM languageDM1)
         {
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM1);
+
+
             languageRenderingComponent.RenderEditComponent();
             languageRenderingComponent.EditButtonLocator()?.Click();
 
@@ -162,35 +153,27 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             languageAssertHelper.AssertExistingLanguageNotUpdatedSuccessfully(expectedMessage, actualMessage);
 
         }
-        public void UpdateLanguageRecordWithInsufficientData(LanguageDM languageDM)
+        public void UpdateLanguageRecordWithInsufficientData(LanguageDM languageDM1, LanguageDM languageDM2)
         {
-            languageAddAndUpdateComponent.EditLanguageRecord(languageDM);
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM1);
+            languageAddAndUpdateComponent.EditLanguageRecord(languageDM2);
 
             actualMessage = languageRenderingComponent.CapturePopupMessage();
             expectedMessage = "Please enter language and level";
             languageAssertHelper.AssertExistingLanguageNotUpdatedSuccessfully(expectedMessage, actualMessage);
         }
-        public void UpdateExistingLanguageRecordWithExistingLanguageName(LanguageDM languageDM1, LanguageDM languageDM2)
-        {
-            int rowcount = languageAddAndUpdateComponent.GetLanguageRecordsCount();
 
-            if (rowcount == 4)
-            {
-                languageRenderingComponent.RenderDeleteComponents();
-            }
-            languageAddAndUpdateComponent.AddLanguage(languageDM1);
-            Thread.Sleep(3000);
-            UpdateExistingLanguageRecordWithFieldsEdited(languageDM2);
-
-        }
-        public void CancelUpdateLanguageRecord(LanguageDM languageDM)
+        public void CancelUpdateLanguageRecord(LanguageDM languageDM1, LanguageDM languageDM2)
         {
             cancelFlag = 1;
+            languageAddAndUpdateComponent.DeleteAllLanguageRecords();
+            languageAddAndUpdateComponent.AddLanguage(languageDM1);
 
             languageAddAndUpdateComponent.SetCancelFlag(cancelFlag);
             Thread.Sleep(2000);
 
-            languageAddAndUpdateComponent.EditLanguageRecord(languageDM);
+            languageAddAndUpdateComponent.EditLanguageRecord(languageDM2);
             cancelFlag = 0;
 
             languageName = languageRenderingComponent.GetLastLanguageName();

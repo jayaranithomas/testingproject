@@ -14,10 +14,11 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileAbou
         IWebElement? availabilityEdit;
         IWebElement? hourEdit;
         IWebElement? targetEdit;
-
         IWebElement? chooseDD;
-
         IWebElement? removeIcon;
+        IWebElement? messageBox;
+        string actualMessage = string.Empty;
+
         public void RenderAvailabilityComponents()
         {
             try
@@ -72,6 +73,28 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileAbou
             }
 
         }
+        public string CapturePopupMessage()
+        {
+
+            Thread.Sleep(1000);
+            try
+            {
+                messageBox = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            if (messageBox != null)
+            {
+                actualMessage = messageBox.Text;
+                Console.WriteLine(actualMessage);
+            }
+
+            return actualMessage;
+        }
+
         public IWebElement OptionLocator()
         {
 

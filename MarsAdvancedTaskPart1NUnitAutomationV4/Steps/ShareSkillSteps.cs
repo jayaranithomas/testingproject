@@ -1,4 +1,5 @@
-﻿using MarsAdvancedTaskPart1NUnitAutomation.DataModel;
+﻿using MarsAdvancedTaskPart1NUnitAutomation.AssertHelpers;
+using MarsAdvancedTaskPart1NUnitAutomation.DataModel;
 using MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsShareSkillComponent;
 using MarsAdvancedTaskPart1NUnitAutomation.Pages.ProfileOverview.ProfileNavigationMenuComponents.RenderingComponents;
 using MarsAdvancedTaskPart1NUnitAutomation.Utilities;
@@ -16,7 +17,7 @@ using System.Threading.Tasks;
 namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
 {
 
-    public class ShareSkillSteps : CommonDriver
+    public class ShareSkillSteps
     {
         string actualMessage;
         string expectedMessage;
@@ -24,88 +25,23 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
         string actualTitle;
         string actualDescription;
         int subCategoryFlag = 0;
-
-        IWebElement? shareSkillButton;
         IWebElement? tag;
 
         ShareSkillsAddComponent shareSkillsAddComponent;
         ShareSkillRenderingComponent shareSkillRenderingComponent;
+        ShareSkillAssertHelper shareSkillAssertHelper;
         public ShareSkillSteps()
         {
             shareSkillsAddComponent = new ShareSkillsAddComponent();
             shareSkillRenderingComponent = new ShareSkillRenderingComponent();
+            shareSkillAssertHelper = new ShareSkillAssertHelper();
             actualMessage = string.Empty;
             expectedMessage = string.Empty;
             errorMessageString = string.Empty;
             actualTitle = string.Empty;
             actualDescription = string.Empty;
         }
-        //To navigate to ServiceListing Page
-        public void SelectShareSkill()
-        {
-            try
-            {
-                Wait.WaitToBeVisible("XPath", "//a[@href='/Home/ServiceListing']", 3);
-                shareSkillButton = driver.FindElement(By.XPath("//a[@href='/Home/ServiceListing']"));
-                shareSkillButton.Click();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-        }
 
-        //To capture the pop up message
-        public void CapturePopupMessage()
-        {
-
-            Thread.Sleep(1000);
-            try
-            {
-                IWebElement messageBox = driver.FindElement(By.XPath("//div[@class='ns-box-inner']"));
-                actualMessage = messageBox.Text;
-
-                IWebElement closeMessageIcon = driver.FindElement(By.XPath("//*[@class='ns-close']"));
-                closeMessageIcon.Click();
-
-                Console.WriteLine(actualMessage);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-        }
-        public void CaptureErrorMessage()
-        {
-            Thread.Sleep(1000);
-            try
-            {
-                IWebElement errorMessage = driver.FindElement(By.XPath("//div[@class='ui basic red prompt label transition visible']"));
-                errorMessageString = errorMessage.Text;
-                Console.WriteLine(errorMessageString);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-        }
-        public void CaptureSubcategoryErrorMessage()
-        {
-            Thread.Sleep(1000);
-            try
-            {
-                IWebElement errorMessage = driver.FindElement(By.XPath("//div[@class='ui red basic label']"));
-                errorMessageString = errorMessage.Text;
-                Console.WriteLine(errorMessageString);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-        }
         public void SetSubCategoryFlag()
         {
             subCategoryFlag = 1;
@@ -115,9 +51,9 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
         {
 
             shareSkillsAddComponent.AddShareSkills(shareSkillDM);
-
-            expectedMessage = "Service Listing Added successfully";
-            Assert.Pass("Service Listing Added successfully");
+            string expectedUrl = "http://localhost:5000/Home/ListingManagement";
+            string actualUrl = shareSkillRenderingComponent.GetCurrentUrl();
+            shareSkillAssertHelper.AssertAddNewShareSkill(expectedUrl, actualUrl);
 
         }
         public void AddShareSkillWithInsufficientData(ShareSkillsDM shareSkillDM)
@@ -125,30 +61,28 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
 
             shareSkillsAddComponent.AddShareSkills(shareSkillDM);
 
-            CapturePopupMessage();
+            actualMessage = shareSkillRenderingComponent.CapturePopupMessage();
 
             if (subCategoryFlag == 0)
-                CaptureErrorMessage();
+                errorMessageString = shareSkillRenderingComponent.CaptureErrorMessage();
             else
             {
-                CaptureSubcategoryErrorMessage();
+                errorMessageString = shareSkillRenderingComponent.CaptureSubcategoryErrorMessage();
                 subCategoryFlag = 0;
             }
 
             expectedMessage = "Please complete the form correctly.";
 
-            Assert.That(actualMessage.Equals(expectedMessage), "The service listing has been added successfully");
-
+            shareSkillAssertHelper.AssertAddShareSkillWithInsufficientData(expectedMessage, actualMessage);
         }
         public void AddShareSkillWithSpecialCharacters(ShareSkillsDM shareSkillDM)
         {
 
             shareSkillsAddComponent.AddShareSkills(shareSkillDM);
 
-            CapturePopupMessage();
-            CaptureErrorMessage();
-
-            Assert.That(errorMessageString.Equals("Special characters are not allowed.") || errorMessageString.Equals("First character must be an alphabet character or a number."), "The service listing has been added successfully");
+            actualMessage = shareSkillRenderingComponent.CapturePopupMessage();
+            errorMessageString = shareSkillRenderingComponent.CaptureErrorMessage();
+            shareSkillAssertHelper.AssertAddShareSkillWithSpecialCharacters(errorMessageString);
 
         }
         public void AddShareSkillWithTitleMoreThan100Characters(ShareSkillsDM shareSkillDM)
@@ -157,9 +91,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             shareSkillsAddComponent.AddShareSkills(shareSkillDM);
 
             actualTitle = shareSkillsAddComponent.GetTitle();
-            Console.WriteLine("The length of the Title is: " + actualTitle.Length);
-
-            Assert.That(!shareSkillDM.title.Equals(actualTitle), "The service listing with more than 100 characters title has been added");
+            shareSkillAssertHelper.AssertAddShareSkillWithTitleMoreThan100Characters(shareSkillDM.title, actualTitle);
 
         }
         public void AddShareSkillWithDescriptionMoreThan600Characters(ShareSkillsDM shareSkillDM)
@@ -168,9 +100,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             shareSkillsAddComponent.AddShareSkills(shareSkillDM);
 
             actualDescription = shareSkillsAddComponent.GetDescription();
-            Console.WriteLine("The length of the Description is: " + actualDescription.Length);
-
-            Assert.That(!shareSkillDM.title.Equals(actualDescription), "The service listing with more than 600 characters description has been added");
+            shareSkillAssertHelper.AssertAddShareSkillWithDescriptionMoreThan600Characters(shareSkillDM.description, actualDescription);
 
         }
         public void AddShareSkillWithMultipleTags(int index)
@@ -181,10 +111,8 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
                 tag?.SendKeys("tag" + i.ToString() + "");
                 tag?.SendKeys(Keys.Enter);
             }
-            var tagCount = driver.FindElements(By.XPath("//span[@class='ReactTags__tag']")).Count;
-            Console.WriteLine("Multiple tags can be entered and the number of tags entered is: " + tagCount);
-
-            Assert.That(tagCount == 10, "The service listing with multiple tags cannot be added");
+            var tagCount = shareSkillRenderingComponent.GetTagCount();
+            shareSkillAssertHelper.AssertAddShareSkillWithMultipleTags(tagCount);
 
         }
         public void AddShareSkillWithDuplicateTags(int index)
@@ -195,10 +123,8 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
                 tag?.SendKeys("tag");
                 tag?.SendKeys(Keys.Enter);
             }
-            var tagCount = driver.FindElements(By.XPath("//span[@class='ReactTags__tag']")).Count;
-            Console.WriteLine("Duplicate tags cannot be entered and the number of tags entered is: " + tagCount);
-
-            Assert.That(tagCount == 1, "The service listing with duplicate tags can be added");
+            var tagCount = shareSkillRenderingComponent.GetTagCount();
+            shareSkillAssertHelper.AssertAddShareSkillWithDuplicateTags(tagCount);
 
         }
         public void AddShareSkillWithSpecialCharactersInTags(int index)
@@ -208,10 +134,8 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             tag?.SendKeys("$^%$%^FHGFHGFG7655");
             tag?.SendKeys(Keys.Enter);
 
-            var tagCount = driver.FindElements(By.XPath("//span[@class='ReactTags__tag']")).Count;
-            Console.WriteLine("Tags with special characters can be entered and the number of tags is: " + tagCount);
-
-            Assert.That(tagCount == 1, "The service listing with tags having special characters cannot be added");
+            var tagCount = shareSkillRenderingComponent.GetTagCount();
+            shareSkillAssertHelper.AssertAddShareSkillWithSpecialCharactersInTags(tagCount);
 
         }
         public void AddShareSkillWithSpacesOnlyInTags(int index)
@@ -221,10 +145,8 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             tag?.SendKeys("             ");
             tag?.SendKeys(Keys.Enter);
 
-            var tagCount = driver.FindElements(By.XPath("//span[@class='ReactTags__tag']")).Count;
-            Console.WriteLine("Tags with spaces alone cannot be entered and the number of tags is: " + tagCount);
-
-            Assert.That(tagCount == 0, "The service listing with tags having spaces only can be added");
+            var tagCount = shareSkillRenderingComponent.GetTagCount();
+            shareSkillAssertHelper.AssertAddShareSkillWithSpacesOnlyInTags(tagCount);
 
         }
         public void DeleteShareSkillListingTags(int index)
@@ -234,17 +156,16 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Steps
             tag?.SendKeys(Keys.Enter);
             tag = shareSkillRenderingComponent.TagRemoveLocator(index);
             tag?.Click();
-            var tagCount = driver.FindElements(By.XPath("//span[@class='ReactTags__tag']")).Count;
-            Console.WriteLine("Tag entered has been removed and the number of tags is: " + tagCount);
-
-            Assert.That(tagCount == 0, "The tag was not deleted");
+            var tagCount = shareSkillRenderingComponent.GetTagCount();
+            shareSkillAssertHelper.AssertDeleteShareSkillListingTags(tagCount);
 
         }
         public void CancelShareSkillListing(ShareSkillsDM shareSkillDM)
         {
             shareSkillsAddComponent.SetCancelFlag(1);
             shareSkillsAddComponent.AddShareSkills(shareSkillDM);
-            Assert.Pass("Service Listing cancelled");
+            shareSkillAssertHelper.AssertCancelShareSkillListing();
+
         }
     }
 }

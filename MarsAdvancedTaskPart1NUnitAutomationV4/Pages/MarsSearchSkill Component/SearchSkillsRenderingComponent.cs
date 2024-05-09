@@ -21,6 +21,9 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsSearchSkill_Component
         IWebElement? searchUserTB;
         IWebElement? filter;
         IWebElement? toSearchRecord;
+        IList<IWebElement>? searchResult;
+        IWebElement? userName;
+
         public void RenderSearchSkillComponents()
         {
             try
@@ -78,6 +81,46 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsSearchSkill_Component
                 Console.WriteLine(ex);
             }
         }
+        public void SelectSearchSkill()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//i[@class='search link icon']", 10);
+                searchSkillsIcon = driver.FindElement(By.XPath("//i[@class='search link icon']"));
+                searchSkillsIcon.Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        public IList<IWebElement> GetSearchRecord()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//*[@class='description']", 15);
+                searchResult = driver.FindElements(By.XPath("//*[@class='description']"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return searchResult!;
+        }
+        public IWebElement GetSearchedUserName()
+        {
+            try
+            {
+                Wait.WaitToBeVisible("XPath", "//div[@class='user-info']//h3", 15);
+                userName = driver.FindElement(By.XPath("//div[@class='user-info']//h3"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return userName!;
+        }
+
         public IWebElement SearchSkillsIconLocator()
         {
 
@@ -115,7 +158,7 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.Pages.MarsSearchSkill_Component
             toSearchRecord = driver.FindElement(By.XPath("//p[@class='row-padded']"));
             toSearchRecord?.Click();
 
-        }        
+        }
 
     }
 }

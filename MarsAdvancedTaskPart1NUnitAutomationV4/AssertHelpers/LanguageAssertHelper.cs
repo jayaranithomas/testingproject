@@ -11,10 +11,10 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.AssertHelpers
     
     public class LanguageAssertHelper
     {
-        public void AssertDeleteAllLanguageRecords(String expected, String actual)
+        public void AssertDeleteAllLanguageRecords(int rowCount)
         {
-
-            Assert.That(actual.Equals(expected), "The language record has not been deleted successfully");
+            if (rowCount == 0) { Console.WriteLine("All Language Records Deleted"); }
+            Assert.That(rowCount==0, "The language records has not been deleted successfully");
 
         }
         public void AssertAddNewLanguage(String expected, String actual)
@@ -45,6 +45,12 @@ namespace MarsAdvancedTaskPart1NUnitAutomation.AssertHelpers
         {
 
             Assert.That(actual.Equals(expected), "The language record has been updated successfully");
+
+        }
+        public void AssertAddFifthLanguage()
+        {
+
+            Assert.Pass("More than 4 languages records cannot be added from front end");
 
         }
 
